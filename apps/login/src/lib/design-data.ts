@@ -1,4 +1,4 @@
-export type DesignData = Record<string, unknown>;
+export type DesignData = Record<string, string>;
 
 const THEME_REQUEST_FIELDS = [
   "accent_100",
@@ -55,12 +55,6 @@ const THEME_REQUEST_FIELDS = [
   "organization_id",
 ] as const;
 
-
-
-const AUTOUPDATE_URL =
-  process.env.OPENSLIDES_AUTOUPDATE_URL ??
-  "http://autoupdate:9012/system/autoupdate";
-
 function createRequestBody() {
   const fields: Record<string, unknown> = {};
 
@@ -84,6 +78,7 @@ function createRequestBody() {
 }
 
 async function fetchDesignData(): Promise<DesignData> {
+  const AUTOUPDATE_URL = process.env.OPENSLIDES_AUTOUPDATE_URL ?? "http://autoupdate:9012";
   const response = await fetch(AUTOUPDATE_URL + "/system/autoupdate?single=1", {
     method: "POST",
     headers: {
