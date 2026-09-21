@@ -78,9 +78,10 @@ function createRequestBody() {
   ];
 }
 
-// Transforms OpenSlides naming patterns to Zitadel patterns
+// Transforms OpenSlides CSS property names to Zitadel CSS property names
 function transformThemeData(themeData: ThemeData): ThemeData {
-  let transformedData : ThemeData = {};
+  const transformedData : ThemeData = {};
+  const reservedAdditonalData : Set<string> = new Set<string>();
 
   for(const [key, value] of Object.entries(themeData)){
     let splitKey: string[] = key.split("/");
@@ -90,7 +91,15 @@ function transformThemeData(themeData: ThemeData): ThemeData {
 
     let transformedKey: string = splitKey[2];
 
+    // Directly add css property
     transformedData[transformedKey] = value;
+
+    // Zitadel uses some properties that are not present OpenSlides theme set
+    // Some of those properties should be overwritten by differently-named OpenSlides CSS properties
+    if((transformedKey === "headbar") || (transformedKey === "accent_500" && !Object.hasOwn(reservedAdditonalData, "headbar"))){
+      transformedData["background-600"] = value;
+      reservedAdditonalData.add(transformedKey);
+    }
   }
 
   return transformedData;

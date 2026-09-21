@@ -4,17 +4,16 @@ import { createContext, ReactNode, useContext } from "react";
 import type { ThemeData } from "@/lib/theme-data";
 
 export function applyOpenSlidesColors(document: Document, themeData: ThemeData) {
-  const root = document.documentElement;
+    const root = document.documentElement;
 
-  if (typeof themeData.primary_500 === "string") {
-    root.style.setProperty("--theme-light-primary-500", themeData.primary_500);
-    root.style.setProperty("--theme-dark-primary-500", themeData.primary_500);
-  }
-
-  if (typeof themeData.warn_500 === "string") {
-    root.style.setProperty("--theme-light-warn-500", themeData.warn_500);
-    root.style.setProperty("--theme-dark-warn-500", themeData.warn_500);
-  }
+    // Create/ Overwrite CSS Properties with OpenSlides Theme Variables
+    for (const [key, value] of Object.entries(themeData)) {
+        if (typeof value === "string") {
+            const normalizedKey: string = key.replaceAll("_", "-");
+            root.style.setProperty(`--theme-light-${normalizedKey}`, value);
+            root.style.setProperty(`--theme-dark-${normalizedKey}`, value);
+        }
+    }
 }
 const OpenSlidesThemeContext = createContext<ThemeData>({});
 
