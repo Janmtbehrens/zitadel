@@ -1,4 +1,4 @@
-export type DesignData = Record<string, string>;
+export type ThemeData = Record<string, string | number>;
 
 const THEME_REQUEST_FIELDS = [
   "accent_100",
@@ -62,10 +62,11 @@ function createRequestBody() {
     fields[fieldName] = null;
   }
   // TODO: Organisation ID is fixed right now, should this change?
+  let organization_id = 1;
   return [
     {
       collection: "organization",
-      ids: [1],
+      ids: [organization_id],
       fields: {
         theme_id: {
           type: "relation",
@@ -77,7 +78,25 @@ function createRequestBody() {
   ];
 }
 
-async function fetchDesignData(): Promise<DesignData> {
+// Transforms OpenSlides naming patterns to Zitadel patterns
+function transformThemeData(themeData: ThemeData): ThemeData {
+  let transformedData : ThemeData = {};
+
+  for(const [key, value] of Object.entries(themeData)){
+    let splitKey: string[] = key.split("/");
+    if (splitKey.length < 3) {
+      throw new Error("OpenSlides variable key is invalid " + key);
+    }
+
+    let transformedKey: string = splitKey[2];
+
+    transformedData[transformedKey] = value;
+  }
+
+  return transformedData;
+}
+
+async function fetchThemeData(): Promise<ThemeData> {
   const AUTOUPDATE_URL = process.env.OPENSLIDES_AUTOUPDATE_URL ?? "http://autoupdate:9012";
   const response = await fetch(AUTOUPDATE_URL + "/system/autoupdate?single=1", {
     method: "POST",
@@ -98,19 +117,21 @@ async function fetchDesignData(): Promise<DesignData> {
     throw new Error("OpenSlides returned an invalid response");
   }
 
-  return responseBody as DesignData;
+  const themeData: ThemeData = transformThemeData( responseBody as ThemeData);
+
+  return themeData;
 }
 
-let cachedDesignData: Promise<DesignData> | undefined;
+let cachedThemeData: Promise<ThemeData> | undefined;
 
-export function getDesignData(): Promise<DesignData> {
-  if (!cachedDesignData) {
-    cachedDesignData = fetchDesignData().catch((error) => {
+export function getThemeData(): Promise<ThemeData> {
+  if (!cachedThemeData) {
+    cachedThemeData = fetchThemeData().catch((error) => {
       console.error("Could not load OpenSlides theme data:", error);
 
       return {};
     });
   }
 
-  return cachedDesignData;
+  return cachedThemeData;
 }

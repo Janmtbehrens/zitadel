@@ -5,6 +5,7 @@ import { BrandingSettings, ThemeMode } from "@zitadel/proto/zitadel/settings/v2/
 import { useTheme } from "next-themes";
 import { ReactNode, useEffect, useLayoutEffect } from "react";
 import { setThemeMode } from "./branding-context";
+import { useOpenSlidesTheme, applyOpenSlidesColors } from "@/components/openslides-theme";
 
 type Props = {
   branding: BrandingSettings | undefined;
@@ -13,10 +14,12 @@ type Props = {
 
 export const ThemeWrapper = ({ children, branding }: Props) => {
   const { setTheme: setNextTheme } = useTheme();
+  const themeData = useOpenSlidesTheme();
 
   useEffect(() => {
     setTheme(document, branding);
-  }, [branding]);
+    applyOpenSlidesColors(document, themeData);
+  }, [branding, themeData]);
 
   // Apply custom font from branding settings before paint to avoid FOUC.
   // When a custom font is uploaded via the label/branding policy, fontUrl
