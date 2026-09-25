@@ -94,7 +94,7 @@ const gotoAccounts = ({
   organization?: string;
   orgDomain?: string;
 }): NextResponse<unknown> => {
-  const accountsUrl = constructUrl(request, "/accounts");
+  const accountsUrl = constructUrl(request, "/loginname");
 
   if (requestId) {
     accountsUrl.searchParams.set("requestId", requestId);

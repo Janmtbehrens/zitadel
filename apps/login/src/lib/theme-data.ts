@@ -96,7 +96,7 @@ function transformThemeData(themeData: ThemeData): ThemeData {
 
     // Zitadel uses some properties that are not present OpenSlides theme set
     // Some of those properties should be overwritten by differently-named OpenSlides CSS properties
-    if((transformedKey === "headbar") || (transformedKey === "accent_500" && !Object.hasOwn(reservedAdditonalData, "headbar"))){
+    if((transformedKey === "headbar") || (transformedKey === "primary_100" && !Object.hasOwn(reservedAdditonalData, "headbar"))){
       transformedData["background-600"] = value;
       reservedAdditonalData.add(transformedKey);
     }

@@ -17,6 +17,8 @@ import { getTranslations } from "next-intl/server";
 import { Lato } from "next/font/google";
 import { headers } from "next/headers";
 import React, { Suspense } from "react";
+import logo from "../../../public/openslides-logo-dark.svg";
+
 
 const lato = Lato({
   weight: ["400", "700", "900"],
@@ -72,14 +74,45 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               >
                 <LanguageProvider>
                   <BackgroundWrapper
-                    className={`bg-background-light-600 dark:bg-background-dark-600 relative flex min-h-screen flex-col justify-center`}
+                    className="bg-background-light-600 dark:bg-background-dark-600 relative flex min-h-screen flex-col justify-start"
                   >
-                    <div className="relative mx-auto w-full max-w-[1100px] py-8">
+                    <div
+                      className="flex w-full items-center justify-center px-4 py-4 text-center"
+                      style={{ backgroundColor: "var(--theme-light-primary-500)" }}
+                    >
+                      <img
+                        src={logo.src}
+                        alt="OpenSlides-logo"
+                        className="h-12 w-auto"
+                      />
+                    </div>
+
+                    <div className="relative mx-auto w-full max-w-[1100px] flex-1 py-8">
+                      <h1 className="flex w-full items-center justify-center px-4 py-4 text-center"> Orga name </h1>
                       <div>{children}</div>
+
                       <div className="mx-auto flex max-w-[440px] flex-row items-center justify-end space-x-4 px-4 py-4 md:max-w-full md:px-8">
                         <LanguageSwitcher languages={languages} />
                         <ThemeSwitch />
                       </div>
+                    </div>
+
+                    <div className="shrink-0 px-4 text-center text-xs" style={{ color: '#3e809d' }}>
+                      <a
+                        href="https://openslides.com"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        © Copyright by OpenSlides
+                      </a>
+
+                      <span className="mx-2">·</span>
+
+                      <a href="/legalnotice">Legal notice</a>
+
+                      <span className="mx-2">·</span>
+
+                      <a href="/privacypolicy">Privacy policy</a>
                     </div>
                   </BackgroundWrapper>
                 </LanguageProvider>

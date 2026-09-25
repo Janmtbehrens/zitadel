@@ -331,7 +331,7 @@ describe("handleOIDCFlowInitiation — org-scoped session filtering", () => {
     );
 
     const location = res.headers.get("location") ?? "";
-    expect(location).toContain("/accounts");
+    expect(location).toContain("/loginname");
   });
 
   test("should resolve loginHint server-side when it matches no session but an unrelated session exists (default prompt)", async () => {
@@ -440,7 +440,7 @@ describe("handleOIDCFlowInitiation — org-scoped session filtering", () => {
     );
 
     const location = res.headers.get("location") ?? "";
-    expect(location).toContain("/accounts");
+    expect(location).toContain("/loginname");
   });
 
   test("should redirect to /loginname when no org scope and no sessions", async () => {
@@ -715,8 +715,8 @@ describe("handleOIDCFlowInitiation — stale session cookie fallback (#12252)", 
     const res = await handleOIDCFlowInitiation(makeBaseParams({ sessions: [], sessionCookies: [staleOrgCookie] }));
 
     const location = res.headers.get("location") ?? "";
-    expect(location).toContain("/accounts");
-    expect(location).not.toContain("/loginname");
+    expect(location).toContain("/loginname");
+    expect(location).not.toContain("/accounts");
   });
 
   test("should ignore cookie entries without a loginName", async () => {
@@ -767,7 +767,7 @@ describe("handleOIDCFlowInitiation — stale session cookie fallback (#12252)", 
     const res = await handleOIDCFlowInitiation(makeBaseParams({ sessions: [], sessionCookies: [staleOrgCookie] }));
 
     const location = res.headers.get("location") ?? "";
-    expect(location).toContain("/accounts");
+    expect(location).toContain("/loginname");
     expect(location).toContain("organization=111111");
   });
 
@@ -783,7 +783,7 @@ describe("handleOIDCFlowInitiation — stale session cookie fallback (#12252)", 
     );
 
     const location = res.headers.get("location") ?? "";
-    expect(location).toContain("/accounts");
+    expect(location).toContain("/loginname");
   });
 
   test("should not show the account picker for prompt=login even if the cookie references an account", async () => {
@@ -832,7 +832,7 @@ describe("handleOIDCFlowInitiation — stale session cookie fallback (#12252)", 
     );
 
     const location = res.headers.get("location") ?? "";
-    expect(location).toContain("/accounts");
+    expect(location).toContain("/loginname");
   });
 });
 
