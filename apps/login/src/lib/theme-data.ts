@@ -1,5 +1,13 @@
 export type ThemeData = Record<string, string | number>;
 
+const ORGANIZATION_REQUEST_FIELDS = [
+  "legal_notice",
+  "privacy_policy",
+  "login_text",
+  "description",
+  "name",
+] as const;
+
 const THEME_REQUEST_FIELDS = [
   "accent_100",
   "accent_200",
@@ -56,24 +64,28 @@ const THEME_REQUEST_FIELDS = [
 ] as const;
 
 function createRequestBody() {
-  const fields: Record<string, unknown> = {};
+  const organizationFields: Record<string, unknown> = {};
+  const themeFields: Record<string, unknown> = {};
 
   for (const fieldName of THEME_REQUEST_FIELDS) {
-    fields[fieldName] = null;
+    themeFields[fieldName] = null;
   }
+  for (const fieldName of ORGANIZATION_REQUEST_FIELDS) {
+    organizationFields[fieldName] = null;
+  }
+  organizationFields["theme_id"] = {
+    type: "relation",
+    collection: "theme",
+    fields: themeFields,
+  };
+
   // TODO: Organisation ID is fixed right now, should this change?
   let organization_id = 1;
   return [
     {
       collection: "organization",
       ids: [organization_id],
-      fields: {
-        theme_id: {
-          type: "relation",
-          collection: "theme",
-          fields,
-        }
-      },
+      fields: organizationFields,
     }
   ];
 }
