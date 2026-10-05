@@ -1,0 +1,34 @@
+
+.detail_link {
+    os-icon-container {
+        width: fit-content;
+        margin-left: auto;
+    }
+}
+.legal_notice_text {
+    display: block;
+    padding-bottom: 20px;
+}
+
+.version_text {
+    display: block;
+    padding-top: 20px;
+}
+
+.mat_divider_horizontal {
+    position: initial;
+}
+
+.as {
+  color: #2196f3;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.as:hover {
+  color: #1976d2;
+}
+
+.as:visited {
+  color: #2196f3;
+}

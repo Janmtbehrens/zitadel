@@ -18,6 +18,7 @@ import { Lato } from "next/font/google";
 import { headers } from "next/headers";
 import React, { Suspense } from "react";
 import logo from "../../../public/openslides-logo-dark.svg";
+import RequestIdLink from "./request-id-transfer";
 
 
 const lato = Lato({
@@ -35,8 +36,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const { serviceConfig } = getServiceConfig(_headers);
   const themeData = await getThemeData();
 
-  console.log(themeData);
-
   let languages = LANGS;
   try {
     const settings = await getAllowedLanguages({ serviceConfig });
@@ -48,6 +47,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   } catch (e) {
     console.error("Failed to load supported languages", e);
   }
+
+  console.log(themeData)
 
   return (
     <html className={`${lato.className}`} suppressHydrationWarning>
@@ -80,15 +81,25 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                       className="flex w-full items-center justify-center px-4 py-4 text-center"
                       style={{ backgroundColor: "var(--theme-light-primary-500)" }}
                     >
+                    <RequestIdLink href="/ui/v2/login/loginname">
                       <img
-                        src={logo.src}
-                        alt="OpenSlides-logo"
-                        className="h-12 w-auto"
-                      />
+                          src={logo.src}
+                          alt="OpenSlides-logo"
+                          className="h-12 w-auto"
+                        />
+                    </RequestIdLink>
                     </div>
 
                     <div className="relative mx-auto w-full max-w-[1100px] flex-1 py-8">
-                      <h1 className="flex w-full items-center justify-center px-4 py-4 text-center"> Orga name </h1>
+                      <h1 className="flex w-full items-center justify-center px-4 py-4 text-center"> { themeData?.name ?? "OpenSlides" } </h1>
+
+                      <div className="mb-6 text-center">
+                        <h1 className="text-2xl font-semibold mb-2">{themeData?.login_text ?? "Good Morning! :)"}</h1>
+                        <p className="text-gray-600 dark:text-gray-400">
+                          "Maybe put something here?"
+                        </p>
+                      </div>
+
                       <div>{children}</div>
 
                       <div className="mx-auto flex max-w-[440px] flex-row items-center justify-end space-x-4 px-4 py-4 md:max-w-full md:px-8">
@@ -108,11 +119,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
                       <span className="mx-2">·</span>
 
-                      <a href="/legalnotice">Legal notice</a>
+                      <RequestIdLink href="/ui/v2/login/legalnotice">
+                        Legal notice
+                      </RequestIdLink>
 
                       <span className="mx-2">·</span>
 
-                      <a href="/privacypolicy">Privacy policy</a>
+                      <RequestIdLink href="/ui/v2/login/privacypolicy">
+                        Privacy policy
+                      </RequestIdLink>
                     </div>
                   </BackgroundWrapper>
                 </LanguageProvider>

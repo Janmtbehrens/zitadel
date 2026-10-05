@@ -1,0 +1,13 @@
+.as {
+  color: #2196f3;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.as:hover {
+  color: #1976d2;
+}
+
+.as:visited {
+  color: #2196f3;
+}
