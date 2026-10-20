@@ -10,12 +10,12 @@ type Props = Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> & {
 };
 
 function LinkWithRequestId({ href, ...rest }: Props) {
+  const instanceURL = `${process.env.INSTANCE_URL || ''}`;
   const requestId = useSearchParams()?.get(PARAM);
-
   const separator = href.includes('?') ? '&' : '?';
   const url = requestId
-    ? `${href}${separator}${PARAM}=${encodeURIComponent(requestId)}`
-    : href;
+      ? `${instanceURL}${href}${separator}${PARAM}=${encodeURIComponent(requestId)}`
+    : `${instanceURL}${href}`;
 
   return <a href={url} {...rest} />;
 }

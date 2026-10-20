@@ -48,8 +48,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     console.error("Failed to load supported languages", e);
   }
 
-  console.log(themeData)
-
   return (
     <html className={`${lato.className}`} suppressHydrationWarning>
       <head />
@@ -91,13 +89,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                     </div>
 
                     <div className="relative mx-auto w-full max-w-[1100px] flex-1 py-8">
-                      <h1 className="flex w-full items-center justify-center px-4 py-4 text-center"> { themeData?.name ?? "OpenSlides" } </h1>
-
-                      <div className="mb-6 text-center">
-                        <h1 className="text-2xl font-semibold mb-2">{themeData?.login_text ?? "Good Morning! :)"}</h1>
-                        <p className="text-gray-600 dark:text-gray-400">
-                          "Maybe put something here?"
-                        </p>
+                      <h1 className="flex w-full items-center justify-center px-4 py-4 text-center text-2xl font-bold mb-2" style={{ color: '#3e809d' }}>
+                        { themeData?.name ?? "OpenSlides" }
+                      </h1>
+                      <div className="relative mx-auto w-full max-w-[440px] px-4 py-4">
+                        <div className="bg-background-light-100 dark:bg-background-dark-500 bg-background-light-400 dark:bg-background-dark-500 border border-black/10 dark:border-white/10 p-6 py-4 rounded-lg">
+                          <p className="text-gray-600 dark:text-gray-400 text-1xl">
+                            <div dangerouslySetInnerHTML={{ __html: themeData?.login_text ?? "Good Morning!" }} />
+                          </p>
+                        </div>
                       </div>
 
                       <div>{children}</div>
@@ -119,13 +119,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
                       <span className="mx-2">·</span>
 
-                      <RequestIdLink href="/ui/v2/login/legalnotice">
+                      <RequestIdLink href="/login/legalnotice">
                         Legal notice
                       </RequestIdLink>
 
                       <span className="mx-2">·</span>
 
-                      <RequestIdLink href="/ui/v2/login/privacypolicy">
+                      <RequestIdLink href="/login/privacypolicy">
                         Privacy policy
                       </RequestIdLink>
                     </div>
