@@ -5,6 +5,8 @@ import { FlowInitiationParams, handleOIDCFlowInitiation, handleSAMLFlowInitiatio
 import { getServiceConfig } from "@/lib/service-url";
 import { listSessions, ServiceConfig } from "@/lib/zitadel";
 import { Session } from "@zitadel/proto/zitadel/session/v2/session_pb";
+import { createHash } from "node:crypto";
+import postgres from "postgres";
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -19,8 +21,68 @@ async function loadSessions({ serviceConfig, ids }: { serviceConfig: ServiceConf
 
   return response?.sessions ?? [];
 }
+const sql = postgres({
+  host: process.env.DATABASE_HOST,
+  port: Number(process.env.DATABASE_PORT),
+  database: process.env.DATABASE_NAME,
+  username: process.env.DATABASE_USER,
+  password: process.env.PGPASSWORD,
+});
+const HEADERS = {
+  Authorization: `Bearer ${process.env.ZITADEL_SERVICE_USER_TOKEN}`,
+  "Content-Type": "application/json",
+  "x-zitadel-instance-host": `${process.env.IDP_EXTERNAL_HOST}`
+};
+
+async function zitadel(method: string, path: string, body: unknown) {
+  const res = await fetch(`${process.env.IDP_URL_INTERNAL}${path}`, {
+    method, headers: HEADERS, body: JSON.stringify(body), cache: "no-store",
+  });
+  if (!res.ok) throw new Error(`Zitadel ${res.status}: ${await res.text()}`);
+  return res.json();
+}
+
+async function magicLogin(authRequestId: string, token: string): Promise<string> {
+  const hash = createHash("sha256").update(token).digest("hex");
+  const expiry = process.env.MAGIC_LINK_EXPIRY_TIME ?? "72 hours";
+  const [row] = await sql`
+  DELETE FROM magic_links
+  WHERE token_hash = ${hash} AND "timestamp" > now() - ${expiry}::interval
+  RETURNING idp_id`;
+  if (!row) {
+    throw new Error("invalid or expired link");
+  }
+  const created = await zitadel("POST", "/v2/sessions", {
+    checks: { user: { userId: row.idp_id } },
+    challenges: { otpEmail: { returnCode: {} } },
+    lifetime: "28800s",
+  });
+  const checked = await zitadel("PATCH", `/v2/sessions/${created.sessionId}`, {
+    checks: { otpEmail: { code: created.challenges.otpEmail } },
+  });
+  const { callbackUrl } = await zitadel("POST", `/v2/oidc/auth_requests/${authRequestId}`, {
+    session: { sessionId: created.sessionId, sessionToken: checked.sessionToken },
+  });
+  return callbackUrl;
+}
 
 export async function GET(request: NextRequest) {
+  const authRequestId = request.nextUrl.searchParams.get("authRequest");
+  const magicToken = request.cookies.get("magic_link")?.value;
+  if (authRequestId && magicToken) {
+    const target = await magicLogin(authRequestId, magicToken).catch((e) => {
+      console.error("Magic link visit error: " + e);
+      return null
+    });
+    const baseURL = process.env.IDP_URL_EXTERNAL ?? "Redirect error";
+
+    const res = NextResponse.redirect(target ?? baseURL);
+    res.cookies.delete("magic_link");
+    if (!target) {
+      res.cookies.set("magic_link_invalid", "1", { path: "/", maxAge: 60, sameSite: "lax", secure: true });
+    }
+    return res;
+  }
   const { serviceConfig } = getServiceConfig(request.headers);
 
   const searchParams = request.nextUrl.searchParams;

@@ -19,6 +19,7 @@ import { headers } from "next/headers";
 import React, { Suspense } from "react";
 import logo from "../../../public/openslides-logo-dark.svg";
 import RequestIdLink from "./request-id-transfer";
+import { MagicLinkNotice } from "@/components/magic-link-notice";
 
 
 const lato = Lato({
@@ -101,6 +102,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                       </div>
 
                       <div>{children}</div>
+                      <MagicLinkNotice />
 
                       <div className="mx-auto flex max-w-[440px] flex-row items-center justify-end space-x-4 px-4 py-4 md:max-w-full md:px-8">
                         <LanguageSwitcher languages={languages} />
