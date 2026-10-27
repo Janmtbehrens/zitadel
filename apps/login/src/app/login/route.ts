@@ -52,18 +52,45 @@ async function magicLogin(authRequestId: string, token: string): Promise<string>
   if (!row) {
     throw new Error("invalid or expired link");
   }
-  const created = await zitadel("POST", "/v2/sessions", {
-    checks: { user: { userId: row.idp_id } },
-    challenges: { otpEmail: { returnCode: {} } },
-    lifetime: "28800s",
-  });
-  const checked = await zitadel("PATCH", `/v2/sessions/${created.sessionId}`, {
-    checks: { otpEmail: { code: created.challenges.otpEmail } },
-  });
-  const { callbackUrl } = await zitadel("POST", `/v2/oidc/auth_requests/${authRequestId}`, {
-    session: { sessionId: created.sessionId, sessionToken: checked.sessionToken },
-  });
-  return callbackUrl;
+
+  // OTP is required to create an validate the session
+  const userId: string = row.idp_id;
+  const otpEmailUrl = `${process.env.ZITADEL_API_URL}/v2/users/${userId}/otp_email`;
+  const enabled = await fetch(otpEmailUrl, { method: "POST", headers: HEADERS, body: "{}", cache: "no-store" });
+
+  // If OTP has already been enabled previously, the return code will be 409.
+  // In this case, proceed but do not remove OTP at the end of the magic session creation
+  if (!enabled.ok && enabled.status !== 409) {
+    throw new Error("Error enabling OTP for user: " + enabled.status + await enabled.text());
+  }
+  const otpEnabledHere = enabled.ok;
+
+  try {
+    // Create and validate session
+    const created = await zitadel("POST", "/v2/sessions", {
+      checks: { user: { userId: row.idp_id } },
+      challenges: { otpEmail: { returnCode: {} } },
+      lifetime: "28800s",
+    });
+    const checked = await zitadel("PATCH", `/v2/sessions/${created.sessionId}`, {
+      checks: { otpEmail: { code: created.challenges.otpEmail } },
+    });
+    const { callbackUrl } = await zitadel("POST", `/v2/oidc/auth_requests/${authRequestId}`, {
+      session: { sessionId: created.sessionId, sessionToken: checked.sessionToken },
+    });
+    return callbackUrl;
+  }finally {
+    // Disable OTP again (no matter the result of session creation)
+    if (otpEnabledHere) {
+      const removed = await fetch(otpEmailUrl, { method: "DELETE", headers: HEADERS, cache: "no-store" }).catch(() => null);
+      if (!removed?.ok) {
+        const details = removed
+          ? `${removed.status} ${await removed.text().catch(() => "")}`
+          : "network error";
+        console.error("Error disabling OTP for user: " + removed?.status + " " + details);
+      }
+    }
+  }
 }
 
 export async function GET(request: NextRequest) {
