@@ -12,6 +12,7 @@ import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 // import { getLocale } from "next-intl/server";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -74,6 +75,14 @@ export default async function Page(props: { searchParams: Promise<Record<string 
   const requestId = searchParams?.requestId;
   const organization = searchParams?.organization;
   const orgDomain = searchParams?.orgDomain;
+
+  // Whenever accounts is visited outside an OIDC Flow, redirect to OpenSlides instead
+  if (!requestId)
+  {
+    const redirectURL = process.env.IDP_INSTANCE_URL ?? "OpenSlides URL missing";
+    redirect(redirectURL);
+    return;
+  }
 
   const _headers = await headers();
   const { serviceConfig } = getServiceConfig(_headers);

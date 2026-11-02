@@ -132,7 +132,7 @@ export default async function Page(props: { searchParams: Promise<Record<string 
       </div>
 
       <div className="w-full">
-        {!initial && (
+        {!initial && !code && (
           <Alert type={AlertType.INFO}>
             <Translated i18nKey="set.codeSent" namespace="password" />
           </Alert>

@@ -19,8 +19,6 @@ export default async function LegalNoticePage() {
   const branding = await getBrandingSettings({ serviceConfig });
   const themeData = await getThemeData();
 
-  console.log("Legal Notice")
-  console.log(themeData)
   return (
     <DynamicTheme branding={branding}>
       <OpenSlidesThemeProvider themeData={themeData}>
