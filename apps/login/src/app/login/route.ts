@@ -48,13 +48,14 @@ async function magicLogin(authRequestId: string, token: string): Promise<string>
   const [row] = await sql`
   DELETE FROM magic_links
   WHERE token_hash = ${hash} AND "timestamp" > now() - ${expiry}::interval
-  RETURNING idp_id`;
+  RETURNING idp_id, meeting_id`;
   if (!row) {
     throw new Error("invalid or expired link");
   }
 
   // OTP is required to create an validate the session
   const userId: string = row.idp_id;
+  const meetingId: string = row.meeting_id;
   const otpEmailUrl = `${process.env.ZITADEL_API_URL}/v2/users/${userId}/otp_email`;
   const enabled = await fetch(otpEmailUrl, { method: "POST", headers: HEADERS, body: "{}", cache: "no-store" });
 
@@ -78,6 +79,12 @@ async function magicLogin(authRequestId: string, token: string): Promise<string>
     const { callbackUrl } = await zitadel("POST", `/v2/oidc/auth_requests/${authRequestId}`, {
       session: { sessionId: created.sessionId, sessionToken: checked.sessionToken },
     });
+
+    if (meetingId != "" && meetingId != "0") {
+      const callbackWithMeetingUrl = callbackUrl + "/" + meetingId + "/";
+      return callbackWithMeetingUrl;
+    }
+
     return callbackUrl;
   }finally {
     // Disable OTP again (no matter the result of session creation)

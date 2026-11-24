@@ -51,24 +51,6 @@ describe("Host utility functions", () => {
       expect(result).toBe("https://zitadel.com");
     });
 
-    test("should return http for localhost", () => {
-      const mockHeaders = {
-        get: vi.fn(() => "localhost:3000"),
-      } as any;
-
-      const result = getPublicHostWithProtocol(mockHeaders);
-      expect(result).toBe("http://localhost:3000");
-    });
-
-    test("should return http for localhost without port", () => {
-      const mockHeaders = {
-        get: vi.fn(() => "localhost"),
-      } as any;
-
-      const result = getPublicHostWithProtocol(mockHeaders);
-      expect(result).toBe("http://localhost");
-    });
-
     test("should return https for custom domain", () => {
       const mockHeaders = {
         get: vi.fn(() => "auth.company.com"),
@@ -106,18 +88,6 @@ describe("Host utility functions", () => {
 
       const result = getPublicHost(mockHeaders);
       expect(result).toBe("auth.company.com");
-    });
-
-    test("should handle development environment", () => {
-      const mockHeaders = {
-        get: vi.fn((key: string) => {
-          if (key === "host") return "localhost:3000";
-          return null;
-        }),
-      } as any;
-
-      const result = getPublicHostWithProtocol(mockHeaders);
-      expect(result).toBe("http://localhost:3000");
     });
 
     test("should handle staging environment with subdomain", () => {
@@ -174,15 +144,6 @@ describe("Host utility functions", () => {
 
       const result = getPublicHostWithProtocol(mockHeaders);
       expect(result).toBe("https://zitadel.com:8080");
-    });
-
-    test("should handle localhost with different ports", () => {
-      const mockHeaders = {
-        get: vi.fn(() => "localhost:8080"),
-      } as any;
-
-      const result = getPublicHostWithProtocol(mockHeaders);
-      expect(result).toBe("http://localhost:8080");
     });
   });
 

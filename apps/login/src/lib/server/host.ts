@@ -44,6 +44,6 @@ export function getPublicHost(headers: ReadonlyHeaders): string {
 
 export function getPublicHostWithProtocol(headers: ReadonlyHeaders): string {
   const host = getPublicHost(headers);
-  const protocol = host.includes("localhost") ? "http://" : "https://";
+  const protocol = "https://";
   return `${protocol}${host}`;
 }
